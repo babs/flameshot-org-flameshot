@@ -7,6 +7,7 @@
 #include "tools/circle/circletool.h"
 #include "tools/circlecount/circlecounttool.h"
 #include "tools/copy/copytool.h"
+#include "tools/emoji/emojitool.h"
 #include "tools/exit/exittool.h"
 #ifdef ENABLE_IMGUR
 #include "tools/imgupload/imguploadertool.h"
@@ -66,6 +67,7 @@ CaptureTool* ToolFactory::CreateTool(CaptureTool::Type t, QObject* parent)
         if_TYPE_return_TOOL(TYPE_SIZEDECREASE, SizeDecreaseTool);
         if_TYPE_return_TOOL(TYPE_INVERT, InvertTool);
         if_TYPE_return_TOOL(TYPE_ACCEPT, AcceptTool);
+        if_TYPE_return_TOOL(TYPE_EMOJI, EmojiTool);
         default:
             return nullptr;
     }

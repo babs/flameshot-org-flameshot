@@ -924,8 +924,18 @@ void CaptureWidget::mouseDoubleClickEvent(QMouseEvent* event)
     if (activeLayerIndex != -1) {
         // Start object editing
         auto activeTool = m_captureToolObjects.at(activeLayerIndex);
-        if (activeTool && activeTool->type() == CaptureTool::TYPE_TEXT) {
+        if (activeTool && (activeTool->type() == CaptureTool::TYPE_TEXT ||
+                           activeTool->type() == CaptureTool::TYPE_EMOJI)) {
             m_activeTool = activeTool;
+            if (m_activeTool->type() == CaptureTool::TYPE_EMOJI) {
+                // Stored objects are copies without signal routing; the emoji
+                // picker commits its edit through requestAction
+                connect(m_activeTool,
+                        &CaptureTool::requestAction,
+                        this,
+                        &CaptureWidget::handleToolSignal,
+                        Qt::UniqueConnection);
+            }
             m_mouseIsClicked = false;
             m_context.mousePos = *m_activeTool->pos();
             m_captureToolObjectsBackup = m_captureToolObjects;
@@ -1420,6 +1430,11 @@ void CaptureWidget::setState(CaptureToolButton* b)
             m_activeButton->setColor(m_contrastUiColor);
             m_panel->setActiveLayer(-1);
             m_panel->setToolWidget(b->tool()->configurationWidget());
+            // The emoji picker lives in the panel; bring it up with the tool
+            if (b->tool()->type() == CaptureTool::TYPE_EMOJI &&
+                !m_panel->isVisible()) {
+                m_panel->show();
+            }
         } else if (m_activeButton) {
             m_panel->clearToolWidget();
             m_activeButton->setColor(m_uiColor);
@@ -1585,6 +1600,10 @@ void CaptureWidget::updateActiveLayer(int layer)
         // Release active tool if it is in the editing mode but not changed and
         // has editing widget (ex: text tool)
         releaseActiveTool();
+    } else if (m_activeTool && m_activeTool->editMode()) {
+        // Panel-only editor (ex: emoji tool): nothing on the canvas to close
+        releaseActiveTool();
+        m_panel->setToolWidget(nullptr);
     }
 
     if (m_existingObjectIsChanged) {

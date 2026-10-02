@@ -123,24 +123,7 @@ void EmojiTool::pressed(CaptureContext& context)
     Q_UNUSED(context)
 }
 
-void EmojiTool::setEditMode(bool editMode)
-{
-    if (editMode) {
-        m_emojiOld = m_emoji;
-    }
-    CaptureTool::setEditMode(editMode);
-}
-
-bool EmojiTool::isChanged()
-{
-    return m_emoji != m_emojiOld;
-}
-
 void EmojiTool::setEmoji(const QString& emoji)
 {
     m_emoji = emoji;
-    // Editing a placed stamp: one pick is the whole edit, commit right away.
-    if (editMode()) {
-        emit requestAction(REQ_COMMIT_CURRENT_TOOL);
-    }
 }

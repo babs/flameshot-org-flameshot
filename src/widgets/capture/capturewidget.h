@@ -40,6 +40,7 @@ class HoverEventFilter;
 class UpdateNotificationWidget;
 #endif
 class UtilityPanel;
+class EmojiConfig;
 class SidePanelWidget;
 
 class CaptureWidget : public QWidget
@@ -114,12 +115,14 @@ protected:
 
 private:
     void pushObjectsStateToUndoStack();
+    void commitSelectedObjectChange();
     void releaseActiveTool();
     void uncheckActiveTool();
     int selectToolItemAtPos(const QPoint& pos);
     void showColorPicker(const QPoint& pos);
     bool startDrawObjectTool(const QPoint& pos);
     QPointer<CaptureTool> activeToolObject();
+    void updateEmojiPicker();
     void initContext(bool fullscreen, const CaptureRequest& req);
     void initPanel();
     void initSelection();
@@ -193,6 +196,7 @@ private:
     QPointer<CaptureTool> m_activeTool;
     bool m_activeToolIsMoved;
     QPointer<QWidget> m_toolWidget;
+    QPointer<EmojiConfig> m_emojiPicker;
     QPointer<QMessageBox> m_quitPrompt;
 
     ButtonHandler* m_buttonHandler;

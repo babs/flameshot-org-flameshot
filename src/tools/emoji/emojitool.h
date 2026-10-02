@@ -25,8 +25,7 @@ public:
     void process(QPainter& painter, const QPixmap& pixmap) override;
     void paintMousePreview(QPainter& painter,
                            const CaptureContext& context) override;
-    void setEditMode(bool editMode) override;
-    bool isChanged() override;
+    void setEmoji(const QString& emoji);
 
 protected:
     CaptureTool::Type type() const override;
@@ -36,9 +35,6 @@ public slots:
     void pressed(CaptureContext& context) override;
 
 private:
-    void setEmoji(const QString& emoji);
-
     QString m_emoji;
-    QString m_emojiOld;
     bool m_valid;
 };

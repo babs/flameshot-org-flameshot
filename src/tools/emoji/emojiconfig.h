@@ -15,7 +15,7 @@ class EmojiConfig : public QWidget
 {
     Q_OBJECT
 public:
-    explicit EmojiConfig(QWidget* parent = nullptr);
+    explicit EmojiConfig(bool grabFocus = true, QWidget* parent = nullptr);
 
     // Color emoji font shared by the picker grid and the stamp itself
     static QFont font(int pixelSize);
@@ -44,4 +44,5 @@ private:
     QLineEdit* m_search;
     QComboBox* m_groupBox;
     QListWidget* m_grid;
+    bool m_grabFocus;
 };

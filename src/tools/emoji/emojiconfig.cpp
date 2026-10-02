@@ -28,11 +28,12 @@ QFont EmojiConfig::font(int px)
     return result;
 }
 
-EmojiConfig::EmojiConfig(QWidget* parent)
+EmojiConfig::EmojiConfig(bool grabFocus, QWidget* parent)
   : QWidget(parent)
   , m_search(new QLineEdit())
   , m_groupBox(new QComboBox())
   , m_grid(new QListWidget())
+  , m_grabFocus(grabFocus)
 {
     loadEntries();
 
@@ -66,6 +67,8 @@ EmojiConfig::EmojiConfig(QWidget* parent)
     m_grid->setGridSize(QSize(CELL_PX, CELL_PX));
     m_grid->setFont(font(GLYPH_PX));
     m_grid->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    // Mouse-only grid: keeps arrow keys for moving the selected stamp
+    m_grid->setFocusPolicy(Qt::NoFocus);
     m_grid->setEnabled(!m_entries.isEmpty());
     connect(m_grid,
             &QListWidget::itemClicked,
@@ -155,7 +158,9 @@ void EmojiConfig::pick(const QString& emoji)
 void EmojiConfig::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
-    m_search->setFocus();
+    if (m_grabFocus) {
+        m_search->setFocus();
+    }
 }
 
 void EmojiConfig::hideEvent(QHideEvent* event)

@@ -15,6 +15,8 @@
 #include "core/flameshot.h"
 #include "core/qguiappcurrentscreen.h"
 #include "tools/copy/copytool.h"
+#include "tools/emoji/emojiconfig.h"
+#include "tools/emoji/emojitool.h"
 #include "utils/abstractlogger.h"
 #include "utils/screengrabber.h"
 #include "utils/screenshotsaver.h"
@@ -842,6 +844,14 @@ bool CaptureWidget::startDrawObjectTool(const QPoint& pos)
     return false;
 }
 
+void CaptureWidget::commitSelectedObjectChange()
+{
+    if (m_existingObjectIsChanged) {
+        m_existingObjectIsChanged = false;
+        pushObjectsStateToUndoStack();
+    }
+}
+
 void CaptureWidget::pushObjectsStateToUndoStack()
 {
     m_undoStack.push(new ModificationCommand(
@@ -1420,6 +1430,11 @@ void CaptureWidget::setState(CaptureToolButton* b)
             m_activeButton->setColor(m_contrastUiColor);
             m_panel->setActiveLayer(-1);
             m_panel->setToolWidget(b->tool()->configurationWidget());
+            // The emoji picker lives in the panel; bring it up with the tool
+            if (b->tool()->type() == CaptureTool::TYPE_EMOJI &&
+                !m_panel->isVisible()) {
+                m_panel->show();
+            }
         } else if (m_activeButton) {
             m_panel->clearToolWidget();
             m_activeButton->setColor(m_uiColor);
@@ -1587,13 +1602,46 @@ void CaptureWidget::updateActiveLayer(int layer)
         releaseActiveTool();
     }
 
-    if (m_existingObjectIsChanged) {
-        m_existingObjectIsChanged = false;
-        pushObjectsStateToUndoStack();
-    }
+    commitSelectedObjectChange();
     drawToolsData();
     drawObjectSelection();
+    // After drawObjectSelection: it unchecks an active tool, which clears the
+    // panel and would drop a picker installed earlier
+    updateEmojiPicker();
     updateSelectionState();
+}
+
+void CaptureWidget::updateEmojiPicker()
+{
+    auto* emoji = qobject_cast<EmojiTool*>(activeToolObject());
+    if (!emoji) {
+        if (m_emojiPicker) {
+            m_panel->setToolWidget(nullptr);
+        }
+        return;
+    }
+    // Focus stays on the canvas so arrow keys still move the selected stamp
+    m_emojiPicker = new EmojiConfig(false);
+    connect(m_emojiPicker,
+            &EmojiConfig::emojiChanged,
+            this,
+            [this](const QString& glyph) {
+                auto* selected = qobject_cast<EmojiTool*>(activeToolObject());
+                if (!selected) {
+                    return;
+                }
+                if (!m_existingObjectIsChanged) {
+                    m_captureToolObjectsBackup = m_captureToolObjects;
+                    m_existingObjectIsChanged = true;
+                }
+                selected->setEmoji(glyph);
+                drawToolsData();
+                // Refreshing the list resets its row; keep the layer selected
+                m_panel->blockSignals(true);
+                updateLayersPanel();
+                m_panel->blockSignals(false);
+            });
+    m_panel->setToolWidget(m_emojiPicker);
 }
 
 void CaptureWidget::onMoveCaptureToolUp(int captureToolIndex)
@@ -1998,6 +2046,8 @@ void CaptureWidget::undo()
         // be called
         m_panel->setActiveLayer(-1);
     }
+    // A pending edit of the selected object must be on the stack before undo
+    commitSelectedObjectChange();
 
     // drawToolsData is called twice to update both previous and new regions
     // FIXME this is a temporary workaround
@@ -2011,6 +2061,7 @@ void CaptureWidget::undo()
 
 void CaptureWidget::redo()
 {
+    commitSelectedObjectChange();
     // drawToolsData is called twice to update both previous and new regions
     // FIXME this is a temporary workaround
     drawToolsData();

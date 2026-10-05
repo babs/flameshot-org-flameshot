@@ -122,6 +122,7 @@ static QMap<class QString, QSharedPointer<ValueHandler>>
     OPTION("drawPixelateSize"            ,LowerBoundedInt    ( 1, 2          )),
     OPTION("drawRectangleSize"           ,LowerBoundedInt    ( 1, 1          )),
     OPTION("drawMarkerSize"              ,LowerBoundedInt    ( 1, 5          )),
+    OPTION("drawEmojiSize"               ,LowerBoundedInt    ( 1, 3          )),
     OPTION("drawColor"                   ,Color              ( Qt::red       )),
     OPTION("userColors"                  ,UserColors         ( 3, 17         )),
     OPTION("ignoreUpdateToVersion"       ,String             ( ""            )),
@@ -378,6 +379,8 @@ void ConfigHandler::setToolSize(CaptureTool::Type toolType, int size)
         setDrawPixelateSize(size);
     } else if (toolType == CaptureTool::TYPE_CIRCLECOUNT) {
         setDrawCircleCounterSize(size);
+    } else if (toolType == CaptureTool::TYPE_EMOJI) {
+        setDrawEmojiSize(size);
     } else if (toolType != CaptureTool::NONE) {
         // All other tools are sharing the same size
         setDrawThickness(size);
@@ -396,6 +399,8 @@ int ConfigHandler::toolSize(CaptureTool::Type toolType)
         return drawPixelateSize();
     } else if (toolType == CaptureTool::TYPE_CIRCLECOUNT) {
         return drawCircleCounterSize();
+    } else if (toolType == CaptureTool::TYPE_EMOJI) {
+        return drawEmojiSize();
     } else {
         // All other tools are sharing the same size
         return drawThickness();

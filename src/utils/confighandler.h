@@ -100,6 +100,7 @@ public:
     CONFIG_GETTER_SETTER(drawPixelateSize, setDrawPixelateSize, int)
     CONFIG_GETTER_SETTER(drawRectangleSize, setDrawRectangleSize, int)
     CONFIG_GETTER_SETTER(drawMarkerSize, setDrawMarkerSize, int)
+    CONFIG_GETTER_SETTER(drawEmojiSize, setDrawEmojiSize, int)
     CONFIG_GETTER_SETTER(keepOpenAppLauncher, setKeepOpenAppLauncher, bool)
 #if !defined(DISABLE_UPDATE_CHECKER)
     CONFIG_GETTER_SETTER(checkForUpdates, setCheckForUpdates, bool)

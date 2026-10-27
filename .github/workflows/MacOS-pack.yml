@@ -18,6 +18,8 @@ on:
 
   workflow_dispatch:
 
+  workflow_call:
+
 env:
   PRODUCT: flameshot
   MACOSX_DEPLOYMENT_TARGET: "14.0"
